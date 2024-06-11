@@ -7,7 +7,10 @@ import (
 	"net/http"
 
 	"github.com/danipaniii/grafana-template-builder/pkg/dashboard"
+	fieldconfig "github.com/danipaniii/grafana-template-builder/pkg/field-config"
+	"github.com/danipaniii/grafana-template-builder/pkg/mappings"
 	"github.com/danipaniii/grafana-template-builder/pkg/panels"
+	"github.com/danipaniii/grafana-template-builder/pkg/thresholds"
 )
 
 var grafana_url = "http://localhost:3000/api/dashboards/db"
@@ -16,16 +19,92 @@ func main() {
 	fmt.Println("Hello Package")
 
 	a := panels.Table{
-		Title: "Test",
-		Type:  "table",
-		//DataSource: "grafana",
+		Title:      "Test",
+		Type:       "table",
+		DataSource: "grafana",
+		GridPos: panels.GridPos{
+			X: 12,
+			Y: 0,
+			H: 3,
+			W: 12,
+		},
+	}
+
+	b := panels.Table{
+		Title:      "Test2",
+		Type:       "table",
+		DataSource: "grafana",
+		FieldConfig: fieldconfig.FieldConfig{
+			Defaults: fieldconfig.Defaults{
+				Thresholds: thresholds.Thresholds{ // provide helper methods for easier generation also for mappings + overrides
+					Mode: "absolute",
+					Steps: []thresholds.Step{
+						{
+							Color: "blue",
+						},
+						{
+							Color: "yellow",
+							Value: 50,
+						},
+						{
+							Color: "green",
+							Value: 80,
+						},
+					},
+				},
+				Mappings: []mappings.Mapping{
+					{
+						Type: "value",
+						Options: map[string]interface{}{
+							"1": mappings.Result{
+								Text: "A",
+							},
+						},
+					},
+					{
+						Type: "range",
+						Options: map[string]interface{}{
+							"from": 35.9,
+							"to":   36.2,
+							"result": mappings.Result{
+								Text: "B",
+							},
+						},
+					},
+					{
+						Type: "regex",
+						Options: map[string]interface{}{
+							"pattern": "\\d",
+							"result": mappings.Result{
+								Text: "B",
+							},
+						},
+					},
+					{
+						Type: "special",
+						Options: map[string]interface{}{
+							"match": "null",
+							"result": mappings.Result{
+								Text: "LOL",
+							},
+						},
+					},
+				},
+			},
+		},
+		GridPos: panels.GridPos{
+			X: 0,
+			Y: 0,
+			H: 3,
+			W: 12,
+		},
 	}
 
 	new_dashboard := dashboard.CreateDashboard{
 		Overwrite: true,
 		Dashboard: dashboard.Dashboard{
 			Title:    "Hello-Test",
-			Panels:   []panels.Panel{a},
+			Panels:   []panels.Panel{a, b},
 			Editable: true,
 		},
 	}

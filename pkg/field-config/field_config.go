@@ -12,4 +12,5 @@ type FieldConfig struct {
 type Defaults struct {
 	Thresholds thresholds.Thresholds `json:"thresholds"`
 	Mappings   []mappings.Mapping    `json:"mappings"`
+	//Custom     map[string]interface{} `json:"custom"`
 }

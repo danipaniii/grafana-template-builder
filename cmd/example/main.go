@@ -18,19 +18,41 @@ var grafana_url = "http://localhost:3000/api/dashboards/db"
 func main() {
 	fmt.Println("Hello Package")
 
-	a := panels.Table{
+	aBasePanel := panels.BasePanel{
 		Title:      "Test",
 		Type:       "table",
 		DataSource: "grafana",
 		GridPos: panels.GridPos{
 			X: 12,
 			Y: 0,
-			H: 3,
+			H: 8,
 			W: 12,
+		},
+		Options: map[string]interface{}{
+			"cellHeight": "md",
 		},
 	}
 
-	b := panels.Table{
+	cBasePanel := panels.BasePanel{
+		Title:      "Test",
+		Type:       "timeseries",
+		DataSource: "grafana",
+		GridPos: panels.GridPos{
+			X: 12,
+			Y: 9,
+			H: 8,
+			W: 12,
+		},
+		Options: map[string]interface{}{
+			"cellHeight": "sm",
+		},
+	}
+
+	// a := panels.Table{
+	// 	BasePanel: aBasePanel,
+	// }
+
+	bBasePanel := panels.BasePanel{
 		Title:      "Test2",
 		Type:       "table",
 		DataSource: "grafana",
@@ -95,16 +117,20 @@ func main() {
 		GridPos: panels.GridPos{
 			X: 0,
 			Y: 0,
-			H: 3,
+			H: 8,
 			W: 12,
 		},
 	}
+
+	// b := panels.Table{
+	// 	BasePanel: bBasePanel,
+	// }
 
 	new_dashboard := dashboard.CreateDashboard{
 		Overwrite: true,
 		Dashboard: dashboard.Dashboard{
 			Title:    "Hello-Test",
-			Panels:   []panels.Panel{a, b},
+			Panels:   []panels.Panel{aBasePanel, bBasePanel, cBasePanel},
 			Editable: true,
 		},
 	}

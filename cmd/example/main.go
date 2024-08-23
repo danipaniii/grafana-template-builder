@@ -86,6 +86,7 @@ func main() {
 							Id: "custom.cellOptions",
 							Value: map[string]interface{}{
 								"type": "color-background",
+								"mode": "basic",
 							},
 						},
 					},
@@ -116,19 +117,11 @@ func main() {
 		Custom: bCustom,
 	}
 
-	basePanelMap := structToMap(bBasePanel)
-
-	// Merge the basePanelMap and customFields do method that does this properly, because right now like this it is overwriting
-	for key, value := range bCustom {
-		basePanelMap[key] = value
-	}
-
-	// Add Custom Field
 	new_dashboard := dashboard.CreateDashboard{
 		Overwrite: true,
 		Dashboard: dashboard.Dashboard{
 			Title:    "Hello-Test",
-			Panels:   []map[string]interface{}{aBasePanel.Render(), basePanelMap, cBasePanel.Render()},
+			Panels:   []interface{}{aBasePanel.Render(), bBasePanel.Render(), cBasePanel.Render()},
 			Editable: true,
 		},
 	}
@@ -174,11 +167,4 @@ func jsonify[T any](dashboard T) ([]byte, error) {
 	}
 
 	return jsonData, nil
-}
-
-func structToMap(obj interface{}) map[string]interface{} {
-	data, _ := json.Marshal(obj)
-	var result map[string]interface{}
-	json.Unmarshal(data, &result)
-	return result
 }

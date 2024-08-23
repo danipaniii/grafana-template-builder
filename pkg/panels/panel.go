@@ -41,10 +41,6 @@ func Jsonify[T any](dashboard T) (string, error) {
 	return string(jsonData), nil
 }
 
-func RenderCustomFields() {
-	// TODO
-}
-
 func structToMap(obj interface{}) map[string]interface{} {
 	data, _ := json.Marshal(obj)
 	var result map[string]interface{}

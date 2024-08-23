@@ -8,7 +8,7 @@ type CreateDashboard struct {
 }
 
 type Dashboard struct {
-	Title    string                   `json:"title"`
-	Editable bool                     `json:"editable"`
-	Panels   []map[string]interface{} `json:"panels"`
+	Title    string        `json:"title"`
+	Editable bool          `json:"editable"`
+	Panels   []interface{} `json:"panels"`
 }

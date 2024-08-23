@@ -1,7 +1,5 @@
 package dashboard
 
-import "github.com/danipaniii/grafana-template-builder/pkg/panels"
-
 type CreateDashboard struct {
 	Dashboard Dashboard `json:"dashboard"`
 	FolderUid string    `json:"folderUid"`
@@ -10,7 +8,7 @@ type CreateDashboard struct {
 }
 
 type Dashboard struct {
-	Title    string         `json:"title"`
-	Editable bool           `json:"editable"`
-	Panels   []panels.Panel `json:"panels"`
+	Title    string                   `json:"title"`
+	Editable bool                     `json:"editable"`
+	Panels   []map[string]interface{} `json:"panels"`
 }

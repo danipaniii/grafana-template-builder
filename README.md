@@ -6,4 +6,6 @@ This is still a work in progress and step by step more features will be added:
 * Support for all grafana panels
 * Support for all panel options
 * Support for all panel transformations
-* Methods to make it easier generating mappings, thresholds and overrides
+* Support for custom JSON, to support components that are newer and not yet implemented in the package
+
+* Methods to make it easier generating mappings, thresholds and overrides - DONE and in testing phase

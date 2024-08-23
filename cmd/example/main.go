@@ -9,6 +9,7 @@ import (
 	"github.com/danipaniii/grafana-template-builder/pkg/dashboard"
 	fieldconfig "github.com/danipaniii/grafana-template-builder/pkg/field-config"
 	"github.com/danipaniii/grafana-template-builder/pkg/mappings"
+	"github.com/danipaniii/grafana-template-builder/pkg/overrides"
 	"github.com/danipaniii/grafana-template-builder/pkg/panels"
 	"github.com/danipaniii/grafana-template-builder/pkg/thresholds"
 )
@@ -52,66 +53,58 @@ func main() {
 	// 	BasePanel: aBasePanel,
 	// }
 
+	bThreshold := thresholds.BuildThreshold("absolute", []thresholds.TTuple{{Color: "blue", Value: 0}, {Color: "yellow", Value: 50}, {Color: "green", Value: 80}})
+
+	bMappings := []mappings.Mapping{}
+	bValMappings := mappings.BuildValueMappings([]mappings.ValTuple{{Value: "1", NewValue: "A"}})
+	bRngMappings := mappings.BuildRangeMappings([]mappings.RngTuple{{From: 35.0, To: 36.2, NewValue: "B"}})
+	bRgxMappings := mappings.BuildRegexMappings([]mappings.RgxTuple{{Pattern: "\\d", NewValue: "C"}})
+	bSpcMappings := mappings.BuildSpecialMappings([]mappings.SpcTuple{{Match: "null", NewValue: "LOL"}})
+
+	bMappings = append(bMappings, bValMappings...)
+	bMappings = append(bMappings, bRngMappings...)
+	bMappings = append(bMappings, bRgxMappings...)
+	bMappings = append(bMappings, bSpcMappings...)
+
+	bOverride := overrides.Override{
+		Matcher: overrides.Matcher{Id: "byName", Options: "A-series"},
+		Properties: []overrides.Property{
+			{
+				Id:    "unit",
+				Value: "m",
+			},
+		},
+	}
+
+	bCustom := map[string]interface{}{
+		"fieldConfig": map[string]interface{}{
+			"overrides": []overrides.Override{
+				{
+					Matcher: overrides.Matcher{Id: "byName", Options: "A-series"},
+					Properties: []overrides.Property{
+						{
+							Id: "custom.cellOptions",
+							Value: map[string]interface{}{
+								"type": "color-background",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
 	bBasePanel := panels.BasePanel{
 		Title:      "Test2",
 		Type:       "table",
 		DataSource: "grafana",
 		FieldConfig: fieldconfig.FieldConfig{
 			Defaults: fieldconfig.Defaults{
-				Thresholds: thresholds.Thresholds{ // provide helper methods for easier generation also for mappings + overrides
-					Mode: "absolute",
-					Steps: []thresholds.Step{
-						{
-							Color: "blue",
-						},
-						{
-							Color: "yellow",
-							Value: 50,
-						},
-						{
-							Color: "green",
-							Value: 80,
-						},
-					},
-				},
-				Mappings: []mappings.Mapping{
-					{
-						Type: "value",
-						Options: map[string]interface{}{
-							"1": mappings.Result{
-								Text: "A",
-							},
-						},
-					},
-					{
-						Type: "range",
-						Options: map[string]interface{}{
-							"from": 35.9,
-							"to":   36.2,
-							"result": mappings.Result{
-								Text: "B",
-							},
-						},
-					},
-					{
-						Type: "regex",
-						Options: map[string]interface{}{
-							"pattern": "\\d",
-							"result": mappings.Result{
-								Text: "B",
-							},
-						},
-					},
-					{
-						Type: "special",
-						Options: map[string]interface{}{
-							"match": "null",
-							"result": mappings.Result{
-								Text: "LOL",
-							},
-						},
-					},
-				},
+				Thresholds: bThreshold,
+				Mappings:   bMappings,
+			},
+			Overrides: []overrides.Override{
+				bOverride,
 			},
 		},
 		GridPos: panels.GridPos{
@@ -120,17 +113,22 @@ func main() {
 			H: 8,
 			W: 12,
 		},
+		Custom: bCustom,
 	}
 
-	// b := panels.Table{
-	// 	BasePanel: bBasePanel,
-	// }
+	basePanelMap := structToMap(bBasePanel)
 
+	// Merge the basePanelMap and customFields do method that does this properly, because right now like this it is overwriting
+	for key, value := range bCustom {
+		basePanelMap[key] = value
+	}
+
+	// Add Custom Field
 	new_dashboard := dashboard.CreateDashboard{
 		Overwrite: true,
 		Dashboard: dashboard.Dashboard{
 			Title:    "Hello-Test",
-			Panels:   []panels.Panel{aBasePanel, bBasePanel, cBasePanel},
+			Panels:   []map[string]interface{}{aBasePanel.Render(), basePanelMap, cBasePanel.Render()},
 			Editable: true,
 		},
 	}
@@ -176,4 +174,11 @@ func jsonify[T any](dashboard T) ([]byte, error) {
 	}
 
 	return jsonData, nil
+}
+
+func structToMap(obj interface{}) map[string]interface{} {
+	data, _ := json.Marshal(obj)
+	var result map[string]interface{}
+	json.Unmarshal(data, &result)
+	return result
 }

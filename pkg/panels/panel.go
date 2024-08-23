@@ -4,11 +4,10 @@ import (
 	"encoding/json"
 
 	fieldconfig "github.com/danipaniii/grafana-template-builder/pkg/field-config"
-	"github.com/danipaniii/grafana-template-builder/pkg/overrides"
 )
 
 type Panel interface {
-	Render() string
+	Render() map[string]interface{}
 }
 
 type BasePanel struct {
@@ -17,9 +16,9 @@ type BasePanel struct {
 	DataSource  string                  `json:"datasource"`
 	Description string                  `json:"description"`
 	FieldConfig fieldconfig.FieldConfig `json:"fieldConfig"`
-	Overrides   []overrides.Override    `json:"overrides"`
 	GridPos     GridPos                 `json:"gridPos"`
 	Options     map[string]interface{}  `json:"options"`
+	Custom      interface{}             `json:"-"`
 }
 
 type GridPos struct {
@@ -29,13 +28,8 @@ type GridPos struct {
 	W int `json:"w"`
 }
 
-func (bp BasePanel) Render() string {
-	bp_string, err := Jsonify(bp)
-	if err != nil {
-		return ""
-	}
-
-	return bp_string
+func (bp BasePanel) Render() map[string]interface{} {
+	return structToMap(bp)
 }
 
 func Jsonify[T any](dashboard T) (string, error) {
@@ -45,4 +39,15 @@ func Jsonify[T any](dashboard T) (string, error) {
 	}
 
 	return string(jsonData), nil
+}
+
+func RenderCustomFields() {
+	// TODO
+}
+
+func structToMap(obj interface{}) map[string]interface{} {
+	data, _ := json.Marshal(obj)
+	var result map[string]interface{}
+	json.Unmarshal(data, &result)
+	return result
 }

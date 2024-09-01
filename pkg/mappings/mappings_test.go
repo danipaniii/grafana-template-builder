@@ -1,1 +1,0 @@
-package mappings_test

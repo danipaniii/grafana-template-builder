@@ -11,6 +11,8 @@ import (
 	"github.com/danipaniii/grafana-template-builder/pkg/mappings"
 	"github.com/danipaniii/grafana-template-builder/pkg/overrides"
 	"github.com/danipaniii/grafana-template-builder/pkg/panels"
+	"github.com/danipaniii/grafana-template-builder/pkg/row"
+	"github.com/danipaniii/grafana-template-builder/pkg/templating"
 	"github.com/danipaniii/grafana-template-builder/pkg/thresholds"
 )
 
@@ -92,6 +94,22 @@ func main() {
 					},
 				},
 			},
+			"defaults": map[string]interface{}{
+				"mappings": []mappings.Mapping{
+					{
+						Type: "value",
+						Options: map[string]interface{}{
+							"2": map[string]interface{}{
+								"text": "asdasdsadsa",
+							},
+						},
+					},
+				},
+			},
+		},
+		"newProperty": map[string]interface{}{
+			"height": "2",
+			"width":  "3",
 		},
 	}
 
@@ -114,15 +132,38 @@ func main() {
 			H: 8,
 			W: 12,
 		},
-		Custom: bCustom,
+		Override: bCustom,
+	}
+
+	sampelRow := row.CreateSimpleRow("test123123", false, panels.GridPos{H: 1})
+
+	sampleTemplating := templating.Templating{
+		List: []templating.Template{
+			{
+				Type:       "custom",
+				Multi:      true,
+				IncludeAll: true,
+				Query:      "1,2,3,4,5,6,7,8",
+				Name:       "sample",
+				Label:      "sample",
+				Options: []templating.Option{
+					{
+						Selected: true,
+						Text:     "All",
+						Value:    "$_all",
+					},
+				},
+			},
+		},
 	}
 
 	new_dashboard := dashboard.CreateDashboard{
 		Overwrite: true,
 		Dashboard: dashboard.Dashboard{
-			Title:    "Hello-Test",
-			Panels:   []interface{}{aBasePanel.Render(), bBasePanel.Render(), cBasePanel.Render()},
-			Editable: true,
+			Title:      "Hello-Test",
+			Panels:     []interface{}{aBasePanel.Render(), sampelRow, bBasePanel.Render(), cBasePanel.Render()},
+			Templating: sampleTemplating,
+			Editable:   true,
 		},
 	}
 
